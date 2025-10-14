@@ -9,7 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author zz
  * 基于内存的 Token 实现（单机 demo 用）。
+ * 不建议生产环境使用
  */
+@Deprecated()
 @Component("tokenIdempotentHandler")
 public class TokenIdempotentHandler implements IdempotentHandler {
 
