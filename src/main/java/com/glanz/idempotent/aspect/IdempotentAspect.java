@@ -4,14 +4,16 @@ import com.glanz.idempotent.annotation.Idempotent;
 import com.glanz.idempotent.core.IdempotentHandler;
 import com.glanz.idempotent.core.IdempotentHandlerFactory;
 import com.glanz.idempotent.exception.IdempotentException;
-import com.glanz.idempotent.mq.mqIdExtractor.MessageIdExtractor;
+import com.glanz.idempotent.mq.MqIdempotentHandler;
+import com.glanz.idempotent.mq.mqIdExtractor.MessageIdDefaultExtractor;
 import com.glanz.idempotent.sceneEnum.SceneEnum;
 import com.glanz.idempotent.util.SpelParser;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +28,7 @@ import java.lang.reflect.Method;
 @Component
 public class IdempotentAspect {
 
+    private static final Logger log = LoggerFactory.getLogger(IdempotentAspect.class);
     @Resource
     private IdempotentHandlerFactory factory;
 
@@ -64,17 +67,13 @@ public class IdempotentAspect {
     String getMessageId(SceneEnum sceneType, Object message) {
         if (sceneType == SceneEnum.MQ) {
             // 获取MessageIdExtractor唯一实现类
-            MessageIdExtractor extractor = ctx.getBean(MessageIdExtractor.class);
-            if (extractor == null) {
-                return new MessageIdExtractor() {
-                    @Override
-                    public String extractId(Object message) {
-                        return sha256(message.toString());
-                    }
-                }.extractId(message.toString());
+            try {
+                MqIdempotentHandler extractor = ctx.getBean(MqIdempotentHandler.class);
+                return extractor.handleMessageId(message);
+            } catch (Exception e) {
+                log.warn("获取mq实现失败，使用默认方式计算唯一ID");
+                return MessageIdDefaultExtractor.sha256(message.toString());
             }
-            // 获取相应的唯一ID
-            return extractor.extractId(message);
         }
         return null;
     }

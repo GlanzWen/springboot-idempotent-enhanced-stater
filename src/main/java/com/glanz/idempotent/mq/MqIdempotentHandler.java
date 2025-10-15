@@ -5,9 +5,8 @@ public interface MqIdempotentHandler {
     /**
      * 处理消息并保证幂等
      * @param message 消息内容（可为 MQ 原始对象）
-     * @param consumer 真正的消费逻辑（用户实现）
      */
-    void handleMessage(Object message, Runnable consumer);
+    String handleMessageId(Object message);
 
     /**
      * 判断消息是否重复消费

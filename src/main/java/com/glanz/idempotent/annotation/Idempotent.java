@@ -16,7 +16,7 @@ import java.lang.annotation.*;
 public @interface Idempotent {
     String type() default "redis";
     String key() default "";                // SpEL，支持手动指定
-    long expireSeconds() default 60;        // 对 HTTP 可小，MQ 场景建议设置大一些
+    long expireSeconds() default 10;        // 对 HTTP 可小，MQ 场景建议设置大一些
     String keyPrefix() default "IDEMPOTENT:";
     SceneEnum sceneType() default SceneEnum.HTTP;
 }

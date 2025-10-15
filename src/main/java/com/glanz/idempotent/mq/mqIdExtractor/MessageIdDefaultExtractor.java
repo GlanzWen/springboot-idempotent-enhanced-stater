@@ -2,12 +2,10 @@ package com.glanz.idempotent.mq.mqIdExtractor;
 
 import java.security.MessageDigest;
 
-public abstract class MessageIdExtractor {
-
-    public abstract String extractId(Object message);
+public class MessageIdDefaultExtractor {
 
     // 默认实现，可以使用该方法作为默认实现
-    public String sha256(String input) {
+    public static String sha256(String input) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hashBytes = digest.digest(input.getBytes("UTF-8"));
