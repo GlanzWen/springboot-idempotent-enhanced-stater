@@ -16,6 +16,10 @@ public class IdempotentHandlerFactory {
     @Resource
     private ApplicationContext ctx;
 
+    /**
+     * 策略获取相应锁实现方式
+     * @param type 锁的方式
+     */
     public com.glanz.idempotent.core.IdempotentHandler getHandler(String type) {
         if (type == null) {
             return null;

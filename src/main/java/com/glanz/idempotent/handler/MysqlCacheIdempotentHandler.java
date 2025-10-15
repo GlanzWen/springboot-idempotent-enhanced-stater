@@ -19,7 +19,6 @@ public class MysqlCacheIdempotentHandler implements IdempotentHandler {
     @Resource
     private JdbcTemplate jdbcTemplate;
 
-
     /*
 
     CREATE TABLE memory_idempotent_record (

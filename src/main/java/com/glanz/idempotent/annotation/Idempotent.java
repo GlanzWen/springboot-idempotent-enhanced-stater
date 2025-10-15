@@ -14,9 +14,14 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Idempotent {
+    // 锁类型支持redis，mysql，token
     String type() default "redis";
-    String key() default "";                // SpEL，支持手动指定
-    long expireSeconds() default 10;        // 对 HTTP 可小，MQ 场景建议设置大一些
+    // SpEL，支持手动指定
+    String key() default "";
+    // 对 HTTP 可小，MQ 场景建议设置大一些
+    long expireSeconds() default 10;
+    // key前缀
     String keyPrefix() default "IDEMPOTENT:";
+    // 幂等使用场景，有http，mq，其他
     SceneEnum sceneType() default SceneEnum.HTTP;
 }
