@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.lang.reflect.Method;
 
 /**
@@ -25,10 +26,10 @@ import java.lang.reflect.Method;
 @Component
 public class IdempotentAspect {
 
-    @Autowired
+    @Resource
     private IdempotentHandlerFactory factory;
 
-    @Autowired
+    @Resource
     private ApplicationContext ctx;
 
     @Around("@annotation(com.glanz.idempotent.annotation.Idempotent)")

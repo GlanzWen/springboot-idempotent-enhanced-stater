@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
+
 /**
  * @author zz
  * 根据 type 获取对应的 Handler，规则：bean 名称为 '{type}IdempotentHandler'。
@@ -11,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class IdempotentHandlerFactory {
 
-    @Autowired
+    @Resource
     private ApplicationContext ctx;
 
     public com.glanz.idempotent.core.IdempotentHandler getHandler(String type) {

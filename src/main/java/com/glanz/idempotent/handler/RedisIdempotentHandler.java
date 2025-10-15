@@ -4,11 +4,11 @@ import com.glanz.idempotent.core.IdempotentHandler;
 import com.glanz.idempotent.support.IdempotentContext;
 import com.glanz.idempotent.support.LockRenewManager;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
+import reactor.util.annotation.Nullable;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -30,7 +30,8 @@ public class RedisIdempotentHandler implements IdempotentHandler {
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
-    @Autowired(required = false)
+    @Resource
+    @Nullable
     private ObjectProvider<ScheduledExecutorService> schedulerProvider;
 
     private DefaultRedisScript<Long> setScript;
