@@ -7,7 +7,7 @@ import com.glanz.idempotent.core.IdempotentHandler;
 import com.glanz.idempotent.core.IdempotentHandlerFactory;
 import com.glanz.idempotent.exception.IdempotentException;
 import com.glanz.idempotent.mq.MqIdempotentHandler;
-import com.glanz.idempotent.mq.mqIdExtractor.MessageIdDefaultExtractor;
+import com.glanz.idempotent.mq.MessageIdDefaultExtractor;
 import com.glanz.idempotent.sceneEnum.SceneEnum;
 import com.glanz.idempotent.util.SpelParser;
 import org.aspectj.lang.ProceedingJoinPoint;

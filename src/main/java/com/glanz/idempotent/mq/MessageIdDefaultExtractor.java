@@ -1,4 +1,4 @@
-package com.glanz.idempotent.mq.mqIdExtractor;
+package com.glanz.idempotent.mq;
 
 import java.security.MessageDigest;
 

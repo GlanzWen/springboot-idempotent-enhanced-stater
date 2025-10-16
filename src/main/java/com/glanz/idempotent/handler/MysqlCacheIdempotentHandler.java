@@ -30,7 +30,7 @@ public class MysqlCacheIdempotentHandler implements IdempotentHandler {
     public boolean tryAcquire(String key, long expireSeconds) throws Exception {
         try {
             LocalDateTime expire = LocalDateTime.now().plusSeconds(expireSeconds);
-            jdbcTemplate.update("INSERT INTO memory_idempotent_record (id) VALUES (?, ?)", key);
+            jdbcTemplate.update("INSERT INTO memory_idempotent_record (id) VALUES (?)", key);
             return true;
         } catch (Exception e) {
             return false;
