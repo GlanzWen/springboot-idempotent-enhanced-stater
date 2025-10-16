@@ -1,11 +1,17 @@
 package com.glanz.idempotent.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.JSONPObject;
+import com.glanz.idempotent.mq.mqIdExtractor.MessageIdDefaultExtractor;
 import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.lang.reflect.Method;
+import java.security.MessageDigest;
 
 /**
  * @author zz
@@ -15,7 +21,7 @@ public class SpelParser {
     private static final ExpressionParser PARSER = new SpelExpressionParser();
     private static final DefaultParameterNameDiscoverer DISCOVERER = new DefaultParameterNameDiscoverer();
 
-    public static String parse(String spel, Method method, Object[] args) {
+    public static Object parseValue(String spel, Method method, Object[] args) {
         if (spel == null || spel.trim().isEmpty()) {
             return "";
         }
@@ -26,6 +32,6 @@ public class SpelParser {
                 ctx.setVariable(params[i], args[i]);
             }
         }
-        return PARSER.parseExpression(spel).getValue(ctx, String.class);
+        return PARSER.parseExpression(spel).getValue(ctx, Object.class);
     }
 }

@@ -24,4 +24,6 @@ public @interface Idempotent {
     String keyPrefix() default "IDEMPOTENT:";
     // 幂等使用场景，有http，mq，其他
     SceneEnum sceneType() default SceneEnum.HTTP;
+
+    Class handlerClass() default void.class;
 }
