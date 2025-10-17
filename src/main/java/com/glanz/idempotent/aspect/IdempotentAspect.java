@@ -6,7 +6,7 @@ import com.glanz.idempotent.annotation.Idempotent;
 import com.glanz.idempotent.core.IdempotentHandler;
 import com.glanz.idempotent.core.IdempotentHandlerFactory;
 import com.glanz.idempotent.exception.IdempotentException;
-import com.glanz.idempotent.mq.MqIdempotentHandler;
+import com.glanz.idempotent.mq.MqIdempotentMessageHandler;
 import com.glanz.idempotent.util.DefaultKeyExtractor;
 import com.glanz.idempotent.enums.SceneEnum;
 import com.glanz.idempotent.util.SpelParser;
@@ -45,7 +45,6 @@ public class IdempotentAspect {
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         long currentThreadId = Thread.currentThread().getId();
         Idempotent anno = method.getAnnotation(Idempotent.class);
-
         // 通用 SpEL 解析返回 Object
         Object parsedValue = SpelParser.parseValue(anno.key(), method, joinPoint.getArgs());
         // 转换为统一字符串
@@ -94,14 +93,22 @@ public class IdempotentAspect {
         }
     }
 
-    String getMessageId(SceneEnum sceneType, Object message, Class handlerClass, Long currentThreadId) {
+    private String getMessageId(SceneEnum sceneType, Object message, Class<?> handlerClass, Long currentThreadId) {
+        // 添加参数校验
+        if (sceneType == null || message == null || currentThreadId == null) {
+            throw new IllegalArgumentException("参数不能为空");
+        }
+
         if (sceneType == SceneEnum.MQ) {
             try {
-                if (handlerClass == void.class) {
+                if (handlerClass == null || handlerClass == void.class) {
                     return DefaultKeyExtractor.sha256(normalizeKey(message, currentThreadId));
                 }
-                MqIdempotentHandler extractor = (MqIdempotentHandler) ctx.getBean(handlerClass);
-                // 计算ID
+                MqIdempotentMessageHandler extractor = (MqIdempotentMessageHandler) ctx.getBean(handlerClass);
+                if (extractor == null) {
+                    log.warn("未发现MqHandler实现类: {}", handlerClass.getName());
+                    return DefaultKeyExtractor.sha256(normalizeKey(message, currentThreadId));
+                }
                 return extractor.handleMessageId(message);
             } catch (Exception e) {
                 log.warn("获取mq实现失败，使用默认方式计算唯一ID", e);
@@ -112,13 +119,28 @@ public class IdempotentAspect {
     }
 
 
-    void repeatHandle (Object message, SceneEnum sceneType, Class handlerClass) {
+    private void repeatHandle(Object message, SceneEnum sceneType, Class<?> handlerClass) {
+        // 添加参数校验
+        if (sceneType == null || message == null) {
+            log.warn("非法参数: sceneType={}, message={}", sceneType, message);
+            return;
+        }
+
         if (sceneType == SceneEnum.MQ) {
-            if (handlerClass == void.class) {
+            if (handlerClass == null || handlerClass == void.class) {
+                log.debug("未指定 MQ 处理程序类, 跳过重复特殊处理逻辑");
                 return;
             }
-            MqIdempotentHandler extractor = (MqIdempotentHandler) ctx.getBean(handlerClass);
-            extractor.markConsumed(message);
+            try {
+                MqIdempotentMessageHandler extractor = (MqIdempotentMessageHandler) ctx.getBean(handlerClass);
+                if (extractor != null) {
+                    extractor.markConsumed(message);
+                } else {
+                    log.warn("未找到类的 MQ 处理程序 Bean: {}", handlerClass.getName());
+                }
+            } catch (Exception e) {
+                log.error("处理重复 MQ 消息错误", e);
+            }
         }
     }
 

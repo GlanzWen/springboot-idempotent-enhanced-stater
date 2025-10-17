@@ -18,11 +18,19 @@ public class MysqlIdempotentHandler implements IdempotentHandler {
     @Resource
     private JdbcTemplate jdbcTemplate;
 
+
+    /*
+
+    CREATE TABLE idempotent_record (
+        id INT PRIMARY KEY
+    );
+
+    */
     @Override
     public boolean tryAcquire(String key, long expireSeconds) {
         try {
             LocalDateTime expire = LocalDateTime.now().plusSeconds(expireSeconds);
-            jdbcTemplate.update("INSERT INTO idempotent_record (id, expire_time) VALUES (?, ?)", key, Timestamp.valueOf(expire));
+            jdbcTemplate.update("INSERT INTO idempotent_record (id) VALUES (?)", key, Timestamp.valueOf(expire));
             return true;
         } catch (Exception e) {
             return false;

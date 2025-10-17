@@ -1,6 +1,6 @@
 package com.glanz.idempotent.mq;
 
-public interface MqIdempotentHandler {
+public interface MqIdempotentMessageHandler {
 
     /**
      * 处理消息并保证幂等
