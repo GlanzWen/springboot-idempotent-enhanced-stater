@@ -1,7 +1,6 @@
 package com.glanz.idempotent.core;
 
-import com.glanz.idempotent.sceneEnum.LockEnum;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.glanz.idempotent.enums.LockEnum;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 

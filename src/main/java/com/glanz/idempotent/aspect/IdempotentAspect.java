@@ -8,7 +8,7 @@ import com.glanz.idempotent.core.IdempotentHandlerFactory;
 import com.glanz.idempotent.exception.IdempotentException;
 import com.glanz.idempotent.mq.MqIdempotentHandler;
 import com.glanz.idempotent.util.DefaultKeyExtractor;
-import com.glanz.idempotent.sceneEnum.SceneEnum;
+import com.glanz.idempotent.enums.SceneEnum;
 import com.glanz.idempotent.util.SpelParser;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -64,6 +64,7 @@ public class IdempotentAspect {
         }
         boolean ok = handler.tryAcquire(key, anno.expireSeconds());
         if (!ok) {
+            repeatHandle (joinPoint.getArgs(), scene, anno.handlerClass());
             throw new IdempotentException("重复请求");
         }
 
@@ -100,6 +101,7 @@ public class IdempotentAspect {
                     return DefaultKeyExtractor.sha256(normalizeKey(message, currentThreadId));
                 }
                 MqIdempotentHandler extractor = (MqIdempotentHandler) ctx.getBean(handlerClass);
+                // 计算ID
                 return extractor.handleMessageId(message);
             } catch (Exception e) {
                 log.warn("获取mq实现失败，使用默认方式计算唯一ID", e);
@@ -108,4 +110,19 @@ public class IdempotentAspect {
         }
         return null;
     }
+
+
+    void repeatHandle (Object message, SceneEnum sceneType, Class handlerClass) {
+        if (sceneType == SceneEnum.MQ) {
+            if (handlerClass == void.class) {
+                return;
+            }
+            MqIdempotentHandler extractor = (MqIdempotentHandler) ctx.getBean(handlerClass);
+            extractor.markConsumed(message);
+        }
+    }
+
+
+
+
 }

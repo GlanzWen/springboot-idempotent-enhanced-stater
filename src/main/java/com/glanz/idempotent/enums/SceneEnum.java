@@ -1,4 +1,4 @@
-package com.glanz.idempotent.sceneEnum;
+package com.glanz.idempotent.enums;
 
 public enum SceneEnum {
     MQ,

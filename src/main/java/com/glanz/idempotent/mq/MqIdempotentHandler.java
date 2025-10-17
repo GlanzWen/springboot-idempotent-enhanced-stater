@@ -9,13 +9,8 @@ public interface MqIdempotentHandler {
     String handleMessageId(Object message);
 
     /**
-     * 判断消息是否重复消费
-     */
-    boolean isDuplicate(String messageId);
-
-    /**
      * 消费完成后标记消息状态
      */
-    void markConsumed(String messageId);
+    void markConsumed(Object message);
 
 }

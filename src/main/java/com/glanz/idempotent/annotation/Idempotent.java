@@ -1,7 +1,7 @@
 package com.glanz.idempotent.annotation;
 
-import com.glanz.idempotent.sceneEnum.LockEnum;
-import com.glanz.idempotent.sceneEnum.SceneEnum;
+import com.glanz.idempotent.enums.LockEnum;
+import com.glanz.idempotent.enums.SceneEnum;
 
 import java.lang.annotation.*;
 
