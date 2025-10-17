@@ -1,8 +1,8 @@
-package com.glanz.idempotent.mq;
+package com.glanz.idempotent.util;
 
 import java.security.MessageDigest;
 
-public class MessageIdDefaultExtractor {
+public class DefaultKeyExtractor {
 
     // 默认实现，可以使用该方法作为默认实现
     public static String sha256(String input) {

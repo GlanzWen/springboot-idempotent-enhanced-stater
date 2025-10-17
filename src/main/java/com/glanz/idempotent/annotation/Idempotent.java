@@ -1,5 +1,6 @@
 package com.glanz.idempotent.annotation;
 
+import com.glanz.idempotent.sceneEnum.LockEnum;
 import com.glanz.idempotent.sceneEnum.SceneEnum;
 
 import java.lang.annotation.*;
@@ -15,7 +16,7 @@ import java.lang.annotation.*;
 @Documented
 public @interface Idempotent {
     // 锁类型支持redis，mysql，token
-    String type() default "redis";
+    LockEnum type() default LockEnum.REDIS;
     // SpEL，支持手动指定
     String key() default "";
     // 对 HTTP 可小，MQ 场景建议设置大一些

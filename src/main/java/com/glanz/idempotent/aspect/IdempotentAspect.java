@@ -7,7 +7,7 @@ import com.glanz.idempotent.core.IdempotentHandler;
 import com.glanz.idempotent.core.IdempotentHandlerFactory;
 import com.glanz.idempotent.exception.IdempotentException;
 import com.glanz.idempotent.mq.MqIdempotentHandler;
-import com.glanz.idempotent.mq.MessageIdDefaultExtractor;
+import com.glanz.idempotent.util.DefaultKeyExtractor;
 import com.glanz.idempotent.sceneEnum.SceneEnum;
 import com.glanz.idempotent.util.SpelParser;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -52,9 +52,12 @@ public class IdempotentAspect {
         String parsed = normalizeKey(parsedValue, currentThreadId);
         // 拼接 key 前缀
         String key = anno.keyPrefix() + parsed;
+        // 获取注解使用场景(默认为HTTP)
         SceneEnum scene = anno.sceneType();
+        // 根据注解使用场景获取正式key
         key = !scene.equals(SceneEnum.MQ) ? key
                 : getMessageId(scene, joinPoint.getArgs(), anno.handlerClass(), currentThreadId);
+        // 策略获取幂等处理器
         IdempotentHandler handler = factory.getHandler(anno.type());
         if (handler == null) {
             throw new IdempotentException("未找到幂等处理器: " + anno.type());
@@ -67,6 +70,7 @@ public class IdempotentAspect {
         try {
             return joinPoint.proceed();
         } finally {
+            // 放锁
             handler.release(key);
         }
     }
@@ -82,10 +86,10 @@ public class IdempotentAspect {
             return value.toString();
         }
         try {
-            return MessageIdDefaultExtractor.sha256(OBJECT_MAPPER.writeValueAsString(value) + currentThreadId);
+            return DefaultKeyExtractor.sha256(OBJECT_MAPPER.writeValueAsString(value) + currentThreadId);
         } catch (JsonProcessingException e) {
             // 兜底 fallback
-            return MessageIdDefaultExtractor.sha256(value.toString());
+            return DefaultKeyExtractor.sha256(value.toString() + currentThreadId);
         }
     }
 
@@ -93,13 +97,13 @@ public class IdempotentAspect {
         if (sceneType == SceneEnum.MQ) {
             try {
                 if (handlerClass == void.class) {
-                    return MessageIdDefaultExtractor.sha256(normalizeKey(message, currentThreadId));
+                    return DefaultKeyExtractor.sha256(normalizeKey(message, currentThreadId));
                 }
                 MqIdempotentHandler extractor = (MqIdempotentHandler) ctx.getBean(handlerClass);
                 return extractor.handleMessageId(message);
             } catch (Exception e) {
                 log.warn("获取mq实现失败，使用默认方式计算唯一ID", e);
-                return MessageIdDefaultExtractor.sha256(normalizeKey(message, currentThreadId));
+                return DefaultKeyExtractor.sha256(normalizeKey(message, currentThreadId));
             }
         }
         return null;
