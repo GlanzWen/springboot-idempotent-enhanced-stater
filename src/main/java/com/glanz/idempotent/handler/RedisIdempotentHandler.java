@@ -2,7 +2,7 @@ package com.glanz.idempotent.handler;
 
 import com.glanz.idempotent.core.IdempotentHandler;
 import com.glanz.idempotent.support.IdempotentContext;
-import com.glanz.idempotent.support.LockRenewManager;
+import com.glanz.idempotent.support.RedisLockRenewManager;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -36,7 +36,7 @@ public class RedisIdempotentHandler implements IdempotentHandler {
 
     private DefaultRedisScript<Long> setScript;
     private DefaultRedisScript<Long> releaseScript;
-    private LockRenewManager renewManager;
+    private RedisLockRenewManager renewManager;
 
     @PostConstruct
     public void init() {
@@ -52,7 +52,7 @@ public class RedisIdempotentHandler implements IdempotentHandler {
         if (schedulerProvider != null) {
             provided = schedulerProvider.getIfAvailable();
         }
-        renewManager = new LockRenewManager(provided);
+        renewManager = new RedisLockRenewManager(provided);
     }
 
     @Override
